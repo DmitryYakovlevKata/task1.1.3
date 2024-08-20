@@ -12,70 +12,58 @@ public class UserDaoJDBCImpl implements UserDao {
 
     }
 
+    Connection connection = new Util().getConnection();
+
     public void createUsersTable() {
-        Connection connection = new Util().getConnection();
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             String query = "CREATE TABLE IF NOT EXISTS Users " +
-                    "(id INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                    "(id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
                     "name VARCHAR(50), " +
                     "lastName VARCHAR(50), " +
                     "age TINYINT)";
             statement.executeUpdate(query);
-            connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
     public void dropUsersTable() {
-        Connection connection = new Util().getConnection();
-        try {
-            Statement statement = connection.createStatement();
+        try (Statement statement = connection.createStatement()) {
             String query = "DROP TABLE IF EXISTS Users";
             statement.executeUpdate(query);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
     public void saveUser(String name, String lastName, byte age) {
-        Connection connection = new Util().getConnection();
-        try {
-            String query = "INSERT INTO Users " +
-                    "(name, lastName, age) " +
-                    "VALUES (?, ?, ?);";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                "INSERT INTO Users " +
+                        "(name, lastName, age) " +
+                        "VALUES (?, ?, ?);")) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
-            connection.close();
             System.out.printf("User с именем — %s добавлен в базу данных\n", name);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
     public void removeUserById(long id) {
-        Connection connection = new Util().getConnection();
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM Users WHERE id = ?;");
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM Users WHERE id = ?;")) {
             preparedStatement.setLong(1, id);
             preparedStatement.executeUpdate();
-            connection.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
     public List<User> getAllUsers() {
-        Connection connection = new Util().getConnection();
         List<User> list = new ArrayList<>();
-        try {
-            Statement statement = connection.createStatement();
-            String query = "SELECT * FROM Users;";
-            ResultSet resultSet = statement.executeQuery(query);
+        try (Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT * FROM Users;")) {
             while (resultSet.next()) {
                 User user = new User();
                 user.setId(resultSet.getLong("id"));
@@ -85,25 +73,17 @@ public class UserDaoJDBCImpl implements UserDao {
                 list.add(user);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
         return list;
     }
 
     public void cleanUsersTable() {
-        Connection connection = new Util().getConnection();
-        try {
-            Statement statement = connection.createStatement();
-            String query1 = "DROP TABLE IF EXISTS Users";
-            String query2 = "CREATE TABLE IF NOT EXISTS Users " +
-                    "(id INTEGER PRIMARY KEY AUTO_INCREMENT, " +
-                    "name VARCHAR(50), " +
-                    "lastName VARCHAR(50), " +
-                    "age TINYINT)";
-            statement.executeUpdate(query1);
-            statement.executeUpdate(query2);
+        try (Statement statement = connection.createStatement()) {
+            String query = "TRUNCATE USERS";
+            statement.executeUpdate(query);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 }
