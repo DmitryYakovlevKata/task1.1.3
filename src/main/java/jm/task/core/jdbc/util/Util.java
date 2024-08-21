@@ -11,7 +11,6 @@ public class Util {
     String user = "root";
     String password = "rootroot";
 
-    //Connection connection = DriverManager.getConnection(url, user, password)
     public Connection getConnection() {
         try {
             Connection connection = DriverManager.getConnection(url, user, password);
