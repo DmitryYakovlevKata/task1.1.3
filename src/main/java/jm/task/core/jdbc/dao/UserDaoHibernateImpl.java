@@ -3,26 +3,22 @@ package jm.task.core.jdbc.dao;
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.Util;
 import org.hibernate.Session;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
     public UserDaoHibernateImpl() {
     }
+
     Session session = new Util().getSessionFactory().openSession();
 
     @Override
     public void createUsersTable() {
         session.beginTransaction();
         session.createSQLQuery("CREATE TABLE IF NOT EXISTS Users " +
-                "(id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
-                "name VARCHAR(50), " +
-                "lastName VARCHAR(50), " +
-                "age TINYINT)")
+                        "(id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
+                        "name VARCHAR(50), " +
+                        "lastName VARCHAR(50), " +
+                        "age TINYINT)")
                 .executeUpdate();
         session.getTransaction().commit();
     }
@@ -51,15 +47,16 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        List<User> users = new ArrayList<User>();
         session.beginTransaction();
-        users = session.createQuery("from User").getResultList();
+        List<User> users = session.createQuery("from User").getResultList();
         session.getTransaction().commit();
         return users;
     }
 
     @Override
     public void cleanUsersTable() {
-
+        session.beginTransaction();
+        session.createSQLQuery("TRUNCATE Users").executeUpdate();
+        session.getTransaction().commit();
     }
 }
